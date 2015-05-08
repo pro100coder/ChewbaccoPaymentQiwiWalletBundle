@@ -29,6 +29,9 @@ class ServerController extends Controller
             if (!$payment->getPaymentInstruction()->getState() == PaymentInstructionInterface::STATE_VALID) {
                 return;
             }
+            if($payment->getState() == PaymentInterface::STATE_DEPOSITED) {
+                return;
+            }
 
             //Оплачен
             if ($bill->status->getCode() == 60) {
@@ -41,14 +44,14 @@ class ServerController extends Controller
             } elseif ($bill->status->getCode() == 161) { //'Отменен (Истекло время)'
                 $payment->setState(PaymentInterface::STATE_EXPIRED);
                 $payment->setExpired(true);
-                $payment->getPaymentInstruction()->setStatus(PaymentInstructionInterface::STATE_INVALID);
+                $payment->getPaymentInstruction()->setState(PaymentInstructionInterface::STATE_INVALID);
                 $em->persist($payment);
                 $em->persist($payment->getPaymentInstruction());
                 $em->flush();
 
             } elseif ($bill->status->getCode() >= 100) { /*100 и выше - отменены (ошибка)*/
                 $payment->setState(PaymentInterface::STATE_CANCELED);
-                $payment->getPaymentInstruction()->setStatus(PaymentInstructionInterface::STATE_INVALID);
+                $payment->getPaymentInstruction()->setState(PaymentInstructionInterface::STATE_INVALID);
                 $em->persist($payment);
                 $em->persist($payment->getPaymentInstruction());
             }
