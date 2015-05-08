@@ -29,6 +29,9 @@ class ServerController extends Controller
             if (!$payment->getPaymentInstruction()->getState() == PaymentInstructionInterface::STATE_VALID) {
                 return;
             }
+            if($payment->getState() == PaymentInterface::STATE_DEPOSITED) {
+                return;
+            }
 
             //Оплачен
             if ($bill->status->getCode() == 60) {
